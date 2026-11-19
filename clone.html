@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>클론 코딩 - 갤러리 카테고리 페이지</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #1f2328;
+    --muted: #8a8f98;
+    --accent: #13b5c4;
+    --card-radius: 6px;
+    --gutter: 16px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #111316;
+      --text: #f1f3f5;
+      --muted: #9aa0a8;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #111316;
+    --text: #f1f3f5;
+    --muted: #9aa0a8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--text); }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  button { font: inherit; background: none; border: 0; cursor: pointer; color: inherit; }
+
+  /* ---------- 상단 카테고리 탭 ---------- */
+  .category-nav {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 28px var(--gutter) 22px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .category-nav::-webkit-scrollbar { display: none; }
+  .category-item {
+    flex: 0 0 auto;
+    width: 92px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 2px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .category-item svg {
+    width: 20px; height: 20px;
+    fill: none; stroke: currentColor; stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+  .category-item.active { color: var(--accent); }
+  .category-item:hover { opacity: .75; }
+  .divider {
+    width: 1px;
+    height: 24px;
+    background: #d9dce1;
+    margin: 8px 14px 0;
+    flex: 0 0 auto;
+  }
+  .category-item.sponsor { width: auto; padding: 0 6px; }
+  .category-item.sponsor .logo {
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: -0.5px;
+    background: linear-gradient(90deg, #13b5c4, #2a8f3a);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* ---------- 카드 그리드 (가로 스크롤) ---------- */
+  .feed {
+    display: flex;
+    gap: 22px;
+    padding: 12px var(--gutter) 40px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+  }
+  .card {
+    flex: 0 0 280px;
+    scroll-snap-align: start;
+    cursor: pointer;
+  }
+  .thumb {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    background: #222;
+    transition: transform .2s ease;
+  }
+  .card:hover .thumb { transform: translateY(-3px); }
+  .thumb .art { position: absolute; inset: 0; }
+
+  /* 썸네일 1: 흑백 포장 목업 느낌 */
+  .art-1 { background: linear-gradient(90deg, #2b2b2b 0 50%, #cfd2d6 50% 100%); }
+  .art-1::after {
+    content: ""; position: absolute; left: 14%; right: 14%; top: 26%; bottom: 26%;
+    background: linear-gradient(135deg, #9a9ea4, #3b3e42);
+    border-radius: 6px;
+  }
+  /* 썸네일 2: 핑크 배경 + 촛불 */
+  .art-2 {
+    background: radial-gradient(circle at 50% 0%, #ff6b8b, #d81b4a 70%);
+  }
+  .art-2::after {
+    content: ""; position: absolute; left: 12%; right: 12%; bottom: 0; height: 60%;
+    background: repeating-linear-gradient(90deg, #ff4f73 0 14px, transparent 14px 34px);
+    opacity: .9;
+  }
+  /* 썸네일 3: 투명 구두 느낌 */
+  .art-3 { background: linear-gradient(160deg, #d8dfc6, #6f7d4b 60%, #3e4a2a); }
+  .art-3::after {
+    content: ""; position: absolute; left: 25%; right: 20%; top: 30%; bottom: 25%;
+    background: radial-gradient(ellipse at 40% 40%, rgba(255,255,255,.7), rgba(180,210,230,.35));
+    border-radius: 45% 45% 20% 20%;
+  }
+  /* 썸네일 4: 검정 배경 + 사진 카드 */
+  .art-4 { background: #000; }
+  .art-4::after {
+    content: ""; position: absolute; left: 22%; right: 18%; top: 24%; bottom: 26%;
+    background: linear-gradient(135deg, #8c8a72, #4d4a3c);
+    border-radius: 2px;
+  }
+  /* 썸네일 5: 파란 배경 인물 */
+  .art-5 { background: linear-gradient(180deg, #2f5c86, #1c3550); }
+  .art-5::after {
+    content: ""; position: absolute; left: 30%; right: 30%; top: 22%; bottom: 0;
+    background: #e9ecef; border-radius: 50% 50% 0 0;
+  }
+  /* 썸네일 6: 빨간 배너 */
+  .art-6 { background: linear-gradient(180deg, #2c6b45, #123b26); }
+  .art-6::after {
+    content: ""; position: absolute; left: 30%; width: 22%; top: 0; bottom: 0;
+    background: linear-gradient(180deg, #7a1d28, #4d0f17);
+  }
+
+  .meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 10px;
+    font-size: 13px;
+    min-height: 22px;
+  }
+  .author {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    min-width: 0;
+  }
+  .avatar {
+    flex: 0 0 auto;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: #c9ced6;
+  }
+  .author-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .stats {
+    display: flex;
+    gap: 10px;
+    color: var(--muted);
+    flex: 0 0 auto;
+    font-size: 12px;
+  }
+  .stats span { display: inline-flex; align-items: center; gap: 4px; }
+  .stats svg {
+    width: 14px; height: 14px;
+    fill: none; stroke: currentColor; stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+  .stats button { color: inherit; display: inline-flex; align-items: center; gap: 4px; }
+  .stats button.liked { color: #ff4d6d; }
+  .stats button.liked svg { fill: currentColor; }
+
+  /* ---------- 반응형 ---------- */
+  @media (max-width: 720px) {
+    .category-nav { justify-content: flex-start; padding-top: 20px; }
+    .card { flex-basis: 72vw; }
+    .feed { gap: 14px; }
+  }
+</style>
+</head>
+<body>
+
+  <nav class="category-nav" id="categoryNav" aria-label="카테고리"></nav>
+
+  <main class="feed" id="feed" aria-label="작품 목록"></main>
+
+<script>
+  // ---------- 데이터 ----------
+  const categories = [
+    { label: "전체",            icon: "layers" },
+    { label: "영상/모션그래픽",   icon: "play" },
+    { label: "그래픽 디자인",     icon: "palette" },
+    { label: "브랜딩/편집",       icon: "id" },
+    { label: "UI/UX",            icon: "pointer" },
+    { label: "일러스트레이션",    icon: "pen" },
+    { label: "디지털 아트",       icon: "canvas" },
+    { label: "AI",               icon: "sparkle" },
+    { label: "캐릭터 디자인",     icon: "face" },
+    { label: "제품/패키지 디자인", icon: "box" },
+    { label: "포토그래피",        icon: "camera" },
+    { label: "타이포그래피",      icon: "type" },
+    { label: "공예",             icon: "diamond" },
+    { label: "파인아트",          icon: "brush" },
+  ];
+
+  const works = [
+    { title: "Material Matters", artClass: "art-1", author: "Hi high studio Hah Kim", views: 191, likes: 9 },
+    { title: "Candles",          artClass: "art-2", author: "25min",                  views: 196, likes: 2, avatarColor: "#e0457b" },
+    { title: "Glass Shoe",       artClass: "art-3", author: "시나브",                  views: 192, likes: 2, avatarColor: "#b7a27a" },
+    { title: "Dog Postcard",     artClass: "art-4", author: "모래",                    views: 182, likes: 9, avatarColor: "#333" },
+    { title: "Travel Ad",        artClass: "art-5", author: "홍희정",                  views: 159, likes: 6, avatarColor: "#7aa7c7" },
+    { title: "AfterTaste",       artClass: "art-6", author: "인볼드",                  views: 247, likes: 11, avatarColor: "#3a7d4f" },
+  ];
+
+  // ---------- 아이콘 (인라인 SVG) ----------
+  const icons = {
+    layers:  '<path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/>',
+    play:    '<circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5-6-3.5z"/>',
+    palette: '<path d="M12 3a9 9 0 100 18c1.5 0 2-1 2-2s-1-1.5-.5-3 2-1.5 3-1.5a2.5 2.5 0 000-5C16 9 14 3 12 3z"/>',
+    id:      '<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="8" cy="12" r="2"/><path d="M13 10h5M13 14h4"/>',
+    pointer: '<path d="M5 3l14 7-6 2-2 6z"/>',
+    pen:     '<path d="M4 20l4-1 11-11-3-3L5 16z"/>',
+    canvas:  '<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 14l3-3 3 3 2-2 2 2"/>',
+    sparkle: '<path d="M12 3v6M12 15v6M3 12h6M15 12h6"/>',
+    face:    '<circle cx="12" cy="12" r="9"/><circle cx="9" cy="10" r="1"/><circle cx="15" cy="10" r="1"/><path d="M9 15c2 1.5 4 1.5 6 0"/>',
+    box:     '<path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/>',
+    camera:  '<rect x="3" y="7" width="18" height="13" rx="2"/><circle cx="12" cy="13.5" r="3.5"/><path d="M8 7l1.5-3h5L16 7"/>',
+    type:    '<path d="M5 6V4h14v2M12 4v16M9 20h6"/>',
+    diamond: '<path d="M6 4h12l4 6-10 11L2 10z"/>',
+    brush:   '<path d="M14 4l6 6-8 8H6v-6z"/>',
+    eye:     '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+    heart:   '<path d="M12 21s-8-5.2-8-11a4.5 4.5 0 018-2.8A4.5 4.5 0 0120 10c0 5.8-8 11-8 11z"/>',
+  };
+  const svg = (name) => `<svg viewBox="0 0 24 24" aria-hidden="true">${icons[name] || ""}</svg>`;
+
+  // ---------- 렌더링 ----------
+  const nav = document.getElementById("categoryNav");
+  let activeIndex = 0;
+
+  function renderNav() {
+    const items = categories.map((c, i) => `
+      <button class="category-item ${i === activeIndex ? "active" : ""}" data-index="${i}" type="button">
+        ${svg(c.icon)}
+        <span>${c.label}</span>
+      </button>`).join("");
+    nav.innerHTML = items + `
+      <span class="divider" aria-hidden="true"></span>
+      <div class="category-item sponsor" title="경기도 AI 콘텐츠">
+        <span class="logo">경기도 AI 콘텐츠</span>
+      </div>`;
+  }
+
+  function renderFeed() {
+    const cards = works.map((w, i) => `
+      <article class="card" data-index="${i}">
+        <div class="thumb"><div class="art ${w.artClass}"></div></div>
+        <div class="meta">
+          <div class="author">
+            <span class="avatar" style="${w.avatarColor ? `background:${w.avatarColor}` : ""}"></span>
+            <span class="author-name">${w.author}</span>
+          </div>
+          <div class="stats">
+            <span>${svg("eye")}${w.views}</span>
+            <button type="button" class="like" aria-label="좋아요">${svg("heart")}${w.likes}</button>
+          </div>
+        </div>
+      </article>`).join("");
+    document.getElementById("feed").innerHTML = cards;
+  }
+
+  // ---------- 이벤트 ----------
+  nav.addEventListener("click", (e) => {
+    const btn = e.target.closest(".category-item[data-index]");
+    if (!btn) return;
+    activeIndex = Number(btn.dataset.index);
+    renderNav();
+  });
+
+  document.getElementById("feed").addEventListener("click", (e) => {
+    const likeBtn = e.target.closest(".like");
+    if (!likeBtn) return;
+    e.stopPropagation();
+    const liked = likeBtn.classList.toggle("liked");
+    const card = likeBtn.closest(".card");
+    const work = works[Number(card.dataset.index)];
+    work.likes += liked ? 1 : -1;
+    likeBtn.lastChild.textContent = work.likes;
+  });
+
+  renderNav();
+  renderFeed();
+</script>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>클론 코딩 - 히어로 & 포스터 캐러셀</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #111111;
+    --muted: #6b7079;
+    --yellow: #ffe000;
+    --gutter: 16px;
+    --poster-h: 400px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--text); }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font: inherit; background: none; border: 0; cursor: pointer; color: inherit; }
+
+  /* ---------- 히어로 ---------- */
+  .hero {
+    text-align: center;
+    padding: 96px var(--gutter) 72px;
+  }
+  .hero h1 {
+    font-family: "Nanum Myeongjo", "Noto Serif KR", "Batang", serif;
+    font-weight: 400;
+    font-size: clamp(30px, 4.6vw, 56px);
+    line-height: 1.4;
+    letter-spacing: -0.5px;
+    word-break: keep-all;
+  }
+  .cta {
+    margin-top: 56px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    height: 62px;
+    padding: 0 36px;
+    border-radius: 999px;
+    background: var(--yellow);
+    font-size: 17px;
+    font-weight: 500;
+    transition: transform .15s ease, filter .15s ease;
+  }
+  .cta:hover { transform: translateY(-2px); filter: brightness(.98); }
+  .cta svg {
+    width: 20px; height: 20px;
+    fill: none; stroke: currentColor; stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  /* ---------- 포스터 캐러셀 ---------- */
+  .showcase {
+    position: relative;
+    margin-top: 40px;
+  }
+  .track {
+    display: flex;
+    height: var(--poster-h);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+    scrollbar-color: #444 #e5e5e5;
+  }
+  .poster {
+    position: relative;
+    flex: 0 0 auto;
+    width: calc(var(--poster-h) * 0.7);
+    height: 100%;
+    overflow: hidden;
+    scroll-snap-align: start;
+    cursor: pointer;
+  }
+  .poster .art { position: absolute; inset: 0; }
+
+  /* 1. Design 매거진 표지 (흰 바탕 + 건물 사진) */
+  .p-1 { background: linear-gradient(180deg, #f4f4f0 0 26%, #c9b9a5 26% 40%, #b65a4a 40% 62%, #a8c2c4 62% 100%); }
+  .p-1::before {
+    content: "Design"; position: absolute; left: 6%; top: 3%; right: 6%; height: 24%;
+    font: 900 64px/1 Georgia, serif; color: #111; letter-spacing: -2px;
+    display: flex; align-items: center; background: #f4f4f0;
+  }
+  .p-1::after {
+    content: ""; position: absolute; left: 6%; right: 6%; bottom: 0; height: 36%;
+    background: linear-gradient(180deg, #d9e2e3, #8e9a8c);
+  }
+
+  /* 2. SEOUL DESIGN FESTIVAL 포스터 (흰 바탕 + 원색 형태) */
+  .p-2 { background: #fff; }
+  .p-2::before {
+    content: ""; position: absolute; left: 10%; right: 10%; top: 42%; bottom: 14%;
+    background:
+      radial-gradient(circle at 25% 30%, #ff2d8a 0 18%, transparent 19%),
+      radial-gradient(circle at 70% 60%, #2b6cff 0 22%, transparent 23%),
+      linear-gradient(135deg, transparent 40%, #20c15a 40% 58%, transparent 58%),
+      linear-gradient(45deg, transparent 30%, #ffd400 30% 48%, transparent 48%);
+  }
+  .p-2::after {
+    content: "2026.11.26.—29.\A COEX HALL A\A SEOUL DESIGN FESTIVAL";
+    white-space: pre; position: absolute; left: 8%; top: 4%;
+    font: 700 13px/1.35 "Helvetica Neue", Arial, sans-serif; color: #111;
+  }
+
+  /* 3. hey POP — 초록 주방 + 흰 테이블 */
+  .p-3 { background: linear-gradient(180deg, #e9ebe6 0 22%, #5e7b4b 22% 46%, #f5f5f2 46% 70%, #d4d4cf 70% 100%); }
+  .p-3::before {
+    content: ""; position: absolute; left: 0; right: 0; top: 46%; height: 6%;
+    background: linear-gradient(180deg, #f7f6f0, #e6e5dd);
+  }
+  .p-3::after {
+    content: "hey POP"; position: absolute; left: 0; right: 0; top: 52%;
+    text-align: center; font: 800 44px/1 "Arial Black", Impact, sans-serif; color: #fff;
+    text-shadow: 0 2px 10px rgba(0,0,0,.25);
+  }
+
+  /* 4. 향토의 집 — 갈색 벽화 + 블루 시트 + 매달린 의자 */
+  .p-4 { background: radial-gradient(circle at 50% 30%, #c49a6c, #7a5133 80%); }
+  .p-4::before {
+    content: ""; position: absolute; left: 36%; width: 30%; top: 0; height: 56%;
+    background: linear-gradient(180deg, #d0d3d6, #e5e7ea);
+  }
+  .p-4::after {
+    content: ""; position: absolute; left: 30%; right: 30%; top: 38%; bottom: 14%;
+    background: radial-gradient(ellipse at 50% 40%, #f6e9d4 0 40%, #7ab9d6 60%, #e5e0cb 100%);
+    border-radius: 50% 50% 46% 46%;
+  }
+  .p-4 .badge {
+    position: absolute; right: 8%; top: 8%; width: 36%; height: 16%;
+    background: #9cc8ea; color: #111; font: 800 18px/1.1 sans-serif; display: grid; place-items: center;
+  }
+
+  /* 5. 블루 웨이브 타이포 */
+  .p-5 { background: #fff; }
+  .p-5::before {
+    content: ""; position: absolute; inset: 0;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 16%, #3d8fe0 16% 19%, transparent 19% 30%),
+      repeating-linear-gradient(90deg, transparent 0 54%, #2a72c9 54% 57%, transparent 57% 70%);
+    opacity: .9;
+  }
+  .p-5::after {
+    content: ""; position: absolute; left: 24%; right: 22%; top: 28%; bottom: 22%;
+    background: linear-gradient(90deg, #7c3aa8 0 50%, #3fb34b 50% 70%, #ff3b2f 70%);
+    clip-path: polygon(0 20%, 60% 0, 100% 35%, 80% 100%, 10% 100%, 0 60%);
+    opacity: .92;
+  }
+
+  /* 6. LUXURY 매거진 표지 (흰 바탕 + 인물) */
+  .p-6 { background: #fff; }
+  .p-6::before {
+    content: "LUXURY"; position: absolute; left: 0; right: 0; top: 4%;
+    text-align: center; font: 500 40px/1 Georgia, "Times New Roman", serif;
+    letter-spacing: 3px; color: #b3243b;
+  }
+  .p-6::after {
+    content: ""; position: absolute; left: 22%; right: 22%; top: 20%; bottom: 0;
+    background: radial-gradient(circle at 50% 22%, #e8c6b3 0 16%, transparent 17%),
+                linear-gradient(180deg, transparent 0 40%, #141414 40% 62%, #f7f5f2 62%);
+  }
+
+  /* 7. 오른쪽 끝에 살짝 잘린 포스터 */
+  .p-7 { background: linear-gradient(180deg, #0f2d4a, #5d8fb8 60%, #e8eef3); }
+  .p-7::before {
+    content: "행복이 가득한 집"; position: absolute; left: 10%; top: 10%;
+    font: 800 22px/1.2 sans-serif; color: #fff;
+  }
+
+  /* 플로팅 편집 버튼 */
+  .fab {
+    position: absolute;
+    right: 24px;
+    bottom: 26px;
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.92);
+    box-shadow: 0 4px 14px rgba(0,0,0,.18);
+    display: grid; place-items: center;
+    color: #111;
+  }
+  .fab svg {
+    width: 22px; height: 22px;
+    fill: none; stroke: currentColor; stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  /* ---------- 반응형 ---------- */
+  @media (max-width: 720px) {
+    .hero { padding: 72px var(--gutter) 48px; }
+    .cta { margin-top: 40px; height: 56px; padding: 0 30px; }
+    :root { --poster-h: 300px; }
+    .fab { right: 16px; bottom: 16px; }
+  }
+</style>
+</head>
+<body>
+
+  <section class="hero">
+    <h1>디자인 관점으로 콘텐츠를<br>기획하고 비즈니스와 연결합니다</h1>
+    <button class="cta" type="button">
+      프로젝트 보기
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
+  </section>
+
+  <section class="showcase" aria-label="프로젝트 포스터">
+    <div class="track" id="track"></div>
+    <button class="fab" type="button" aria-label="편집">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></svg>
+    </button>
+  </section>
+
+<script>
+  const posters = ["p-1", "p-2", "p-3", "p-4", "p-5", "p-6", "p-7"];
+  const track = document.getElementById("track");
+  track.innerHTML = posters.map((c, i) => `
+    <figure class="poster ${c}" data-index="${i}">
+      <div class="art"></div>
+      ${c === "p-4" ? '<span class="badge">향토</span>' : ""}
+    </figure>`).join("");
+</script>
+</body>
+</html>
